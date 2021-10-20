@@ -7,6 +7,9 @@
   "main": "dist/server/index.js",
   "types": "dist/server/index.d.ts",
   "scripts": {},
+  "bin": {
+    "themost-test-api": "dist/server/standalone.js"
+  },
   "peerDependencies": {},
   "devDependencies": {
     "@types/express": "^4.17.2",
