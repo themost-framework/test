@@ -44,6 +44,7 @@
     "@types/passport": "^1.0.7",
     "babel-eslint": "^10.1.0",
     "cors": "^2.8.5",
+    "ejs-locals": "^1.0.2",
     "es6-promisify": "^6.1.1",
     "eslint": "^7.32.0",
     "jasmine": "^3.10.0",
@@ -51,7 +52,10 @@
     "lodash": "^4.17.21",
     "node-fetch": "^2.6.5",
     "nodemon": "^2.0.14",
+    "passport": "^0.4.0",
+    "passport-http-bearer": "^1.0.1",
     "rimraf": "^2.7.1",
+    "temp": "^0.9.1",
     "typescript": "^3.9.10"
   },
   "dependencies": {
