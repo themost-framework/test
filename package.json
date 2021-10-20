@@ -47,7 +47,7 @@
     "ejs-locals": "^1.0.2",
     "es6-promisify": "^6.1.1",
     "eslint": "^7.32.0",
-    "jasmine": "^3.10.0",
+    "jasmine": "^3.5.0",
     "jasmine-spec-reporter": "^4.2.1",
     "lodash": "^4.17.21",
     "node-fetch": "^2.6.5",

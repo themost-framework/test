@@ -1,3 +1,4 @@
+/* eslint-disable quotes */
 module.exports = function (api) {
     api.cache(false);
     return {
@@ -34,10 +35,7 @@ module.exports = function (api) {
                 }
             ],
             [
-                "@babel/plugin-proposal-class-properties",
-                {
-                    "loose": true
-                }
+                "@babel/plugin-proposal-class-properties"
             ]
         ]
     };
