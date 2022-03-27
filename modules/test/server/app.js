@@ -1,6 +1,6 @@
 
 import express from 'express';
-import engine from 'ejs-locals';
+import {ViewEngine} from '@themost/ejs';
 import path from 'path';
 import passport from 'passport';
 import {authRouter} from './routes/auth';
@@ -47,8 +47,8 @@ function getApplication() {
 app.use(cors({ origin:true, credentials: true }));
 
 
-// use ejs-locals for all ejs templates
-  app.engine('ejs', engine);
+// use ViewEngine for all ejs templates
+  app.engine('ejs', ViewEngine.express());
 // view engine setup
   app.set('views', path.join(__dirname, 'views'));
   app.set('view engine', 'ejs');
