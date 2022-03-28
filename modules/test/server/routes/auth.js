@@ -232,6 +232,10 @@ function authRouter() {
 
     });
 
+    router.get('/', (req, res) => {
+        return res.redirect('login');
+    });
+
     router.get('/login', async function getLogin(req, res) {
          const client_id = req.query.client_id;
          const redirect_uri = req.query.redirect_uri || '/';
