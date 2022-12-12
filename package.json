@@ -25,7 +25,7 @@
     "@babel/plugin-transform-modules-commonjs": "^7.15.4",
     "@babel/plugin-transform-strict-mode": "^7.14.5",
     "@babel/plugin-transform-typeof-symbol": "^7.14.5",
-    "@babel/preset-env": "^7.15.8",
+    "@babel/preset-env": "^7.20.2",
     "@babel/register": "^7.15.3",
     "@babel/runtime": "^7.15.4",
     "@themost/cli": "^2.5.7",
