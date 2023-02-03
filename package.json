@@ -31,11 +31,11 @@
     "@themost/cli": "^2.5.7",
     "@themost/client": "^2.5.5",
     "@themost/common": "^2.5.12",
-    "@themost/data": "^2.8.5",
+    "@themost/data": "^2.9.3",
     "@themost/ejs": "^2.0.1",
-    "@themost/express": "^1.5.24",
+    "@themost/express": "^1.6.0",
     "@themost/node": "^2.5.0",
-    "@themost/query": "^2.5.21",
+    "@themost/query": "^2.9.1",
     "@themost/sqlite": "^2.6.9",
     "@themost/web": "^2.5.16",
     "@themost/xml": "^2.5.2",
@@ -58,8 +58,5 @@
     "rimraf": "^2.7.1",
     "temp": "^0.9.1",
     "typescript": "^3.9.10"
-  },
-  "dependencies": {
-    
   }
 }
