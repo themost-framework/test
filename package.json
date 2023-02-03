@@ -1,6 +1,6 @@
 {
   "name": "themost-test-src",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "MOST Web Framework Codename Blueshift Test Api Server",
   "repository": " https://github.com/themost-framework/themost-test.git",
   "private": true,
