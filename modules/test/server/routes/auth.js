@@ -56,7 +56,7 @@ function authRouter() {
                         return done(new HttpForbiddenError());
                     }
                     // check if user has enabled attribute
-                    if (user.hasOwnProperty('enabled') && !user.enabled) {
+                    if (Object.prototype.hasOwnProperty.call(user, 'enabled') && !user.enabled) {
                         //if user.enabled is off throw forbidden error
                         return done(new HttpForbiddenError('Access is denied. User account is disabled.'));
                     }
