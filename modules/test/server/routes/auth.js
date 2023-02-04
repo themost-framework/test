@@ -42,10 +42,6 @@ function authRouter(options) {
         return _publicKey;
     }
 
-
-    const publicKey = fs.readFileSync(options.publicKey);
-    const privateKey = fs.readFileSync(options.privateKey);
-
     // passport bearer authorization strategy
     // https://github.com/jaredhanson/passport-http-bearer#usage
     // noinspection JSCheckFunctionSignatures
