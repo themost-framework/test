@@ -9,10 +9,20 @@
 import {serveApplication} from './serve';
 import debug from 'debug';
 import {getApplication} from './app';
+import { Command, Option } from 'commander';
 const log = debug('themost-framework:test');
 (async function() {
     try {
-        await serveApplication(getApplication(), process.env.PORT, process.env.IP);
+        const program = new Command();
+        program
+            .name('npx @themost/test')
+            .description('starts @themost-framework test api server')
+            .version('2')
+            .addOption(new Option('-p, --port <number>', 'port number').env('PORT'))
+            .addOption(new Option('-h, --host <string>', 'host address').env('IP'))
+        program.parse();
+        const args = program.opts();
+        await serveApplication(getApplication(), args.port, args.host);
     }
     catch(err) {
         log(err);
