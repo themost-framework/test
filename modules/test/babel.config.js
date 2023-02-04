@@ -2,7 +2,7 @@
 module.exports = function (api) {
     api.cache(false);
     return {
-        "sourceMaps": true,
+        "sourceMaps": "inline",
         "retainLines": true,
         "presets": [
             [
@@ -10,8 +10,7 @@ module.exports = function (api) {
                 {
                     "targets": {
                         "node": "current"
-                    },
-                    "modules": "commonjs"
+                    }
                 }
             ]
         ],
@@ -19,15 +18,6 @@ module.exports = function (api) {
             /\/node_modules/
         ],
         "plugins": [
-            [
-                "@babel/plugin-transform-async-to-generator"
-            ],
-            [
-                "@babel/plugin-proposal-export-default-from"
-            ],
-            [
-                "@babel/plugin-proposal-export-namespace-from"
-            ],
             [
                 "@babel/plugin-proposal-decorators",
                 {
