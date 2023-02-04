@@ -68,7 +68,11 @@ app.use(cors({ origin:true, credentials: true }));
 
   app.use('/', indexRouter);
 
-  app.use('/auth/', authRouter());
+  // pass RSA private and public keys
+  app.use('/auth/', authRouter({
+    privateKey: path.resolve(__dirname, 'config', 'private.key'),
+    publicKey: path.resolve(__dirname, 'config', 'public.pem')
+  }));
 
 // use @themost/express service router
 // noinspection JSCheckFunctionSignatures

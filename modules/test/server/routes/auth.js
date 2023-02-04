@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://themost.io/license
  */
 import express from 'express';
+import fs from 'fs';
 import {
     Args,
     HttpBadRequestError,
@@ -16,12 +17,34 @@ import {
 } from '@themost/common';
 import passport from 'passport';
 import BearerStrategy from 'passport-http-bearer';
+import jwt from 'jsonwebtoken';
+
 const User = require('../models/user-model');
 // noinspection JSUnusedGlobalSymbols
 /**
- *
+ * @param {{privateKey: string, publicKey: string}} options
  */
-function authRouter() {
+function authRouter(options) {
+
+    
+    let _privateKey;
+    function getPrivateKey() {
+        if (_privateKey == null) {
+            return _privateKey = fs.readFileSync(options.privateKey);
+        }
+        return _privateKey;
+    }
+    let _publicKey;
+    function getPublicKey() {
+        if (_publicKey == null) {
+            return _publicKey = fs.readFileSync(options.publicKey);
+        }
+        return _publicKey;
+    }
+
+
+    const publicKey = fs.readFileSync(options.publicKey);
+    const privateKey = fs.readFileSync(options.privateKey);
 
     // passport bearer authorization strategy
     // https://github.com/jaredhanson/passport-http-bearer#usage
@@ -107,38 +130,36 @@ function authRouter() {
                 new HttpUnauthorizedError('Invalid user credentials'));
             //get expiration timeout
             const expirationTimeout = parseInt(req.context.application.getConfiguration().getSourceAt('auth/timeout') || 60, 10)*60*1000;
-            const secret = req.context.application.getConfiguration().getSourceAt('settings/crypto/key');
             const expirationTimeoutSeconds = parseInt(expirationTimeout / 1000);
             //calculate expiration time
             const expires = new Date().getTime() + expirationTimeout;
-            //create new token or update an existing one
-            let token = await req.context.model('AccessToken')
-                .where('client_id').equal(body.client_id)
-                .and('user_id').equal(body.username)
-                .and('scope').equal(body.scope)
-                .and('expires').lowerOrEqual(new Date())
-                .silent()
-                .getItem();
-            if (token) {
-                token.expires = new Date(expires);
-            }
-            else {
-                token = {
-                    client_id: body.client_id,
-                    user_id: body.username,
-                    scope: body.scope,
-                    expires: new Date(expires)
-                };
-            }
-            await req.context.model('AccessToken').silent().save(token);
-            return res.json({
-                access_token: token.access_token,
-                token_type: 'bearer',
-                expires_in: (expirationTimeout / 1000), // in seconds
-                refresh_token: token.refresh_token,
-                scope: token.scope
-            });
 
+            const user = await req.context.model(User).where('name').equal(body.username).silent().getItem();
+
+            const access_token = jwt.sign({
+                sub: user.name,
+                exp: expires,
+                name: user.description,
+                scope: body.scope.split(' '),
+                client_id: body.client_id
+            }, getPrivateKey(), { algorithm: 'RS256' });
+
+            const refresh_token = jwt.sign({
+                sub: user.name,
+                exp: expires,
+                name: user.description,
+                scope: body.scope.split(' '),
+                client_id: body.client_id
+            }, getPrivateKey(), { algorithm: 'RS256' });
+
+            return res.json({
+                access_token: access_token,
+                token_type: 'bearer',
+                expires_in: expirationTimeoutSeconds,
+                refresh_token: refresh_token,
+                scope: body.scope
+            });
+            
         }
         catch (err) {
             return next(err);
@@ -156,7 +177,7 @@ function authRouter() {
             const authorizationHeader = req.header('Authorization');
             Args.check(authorizationHeader, new HttpUnauthorizedError('Missing client credentials.'));
             // convert base64 header to string
-            let buff = new Buffer(authorizationHeader.replace(/^Basic\s+/,''), 'base64');
+            let buff = Buffer.from(authorizationHeader.replace(/^Basic\s+/,''), 'base64');
             let authorizationHeaderText = buff.toString('ascii');
             // split text and get client credentials
             let match = /^(.*?):(.*?)$/.exec(authorizationHeaderText);
@@ -167,11 +188,11 @@ function authRouter() {
             const client = await req.context.model('AuthClient').where('client_id').equal(client_id)
                 .and('client_secret').equal(client_secret).silent().getItem();
             Args.check(client != null, new HttpUnauthorizedError('Invalid client credentials.'));
-            const token = await req.context.model('AccessToken')
-                .where('access_token').equal(body.token)
-                .silent()
-                .getItem();
-            if (token == null) {
+
+            // validate toke
+            const decoded = jwt.verify(body.token, getPublicKey());
+
+            if (decoded == null) {
                 // return non-active response
                 return res.json({
                     active: false
@@ -179,19 +200,15 @@ function authRouter() {
             }
             else {
                 // if token has been expired
-                if (new Date(token.expires).getTime() < new Date().getTime()) {
+                if (new Date(decoded.exp).getTime() < new Date().getTime()) {
                     // return non-active response
                     return res.json({
                         active: false
                     });
                 }// return token info
-                return res.json({
-                    active: true,
-                    scope: token.scope,
-                    client_id: token.client_id,
-                    username: token.username,
-                    exp: new Date(token.expires).getTime()
-                });
+                return res.json(Object.assign(decoded, {
+                    active: true
+                }));
             }
         }
         catch (err) {

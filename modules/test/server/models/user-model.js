@@ -11,7 +11,6 @@ let Account = require('./account-model');
  * @property {Array<Group|any>} groups
  * @property {number} userFlags
  * @property {number} id
- * @augments {DataObject}
  */
 @EdmMapping.entityType('User')
 class User extends Account {
