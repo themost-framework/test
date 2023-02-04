@@ -22,7 +22,7 @@ This project contains a test api server for testing libraries and modules.
 
     npx @themost/test [--port] [--host]
 
-or as backend server in any testing environment:
+or being started it as backend server in any testing environment:
 
         import { getApplication, serveApplication, getServerAddress } from "@themost/test";
         import fetch from "node-fetch";
