@@ -1,7 +1,7 @@
 [![npm](https://img.shields.io/npm/v/@themost%2Ftest.svg)](https://www.npmjs.com/package/@themost%2Ftest)
 ![](https://github.com/themost-framework/themost-test/workflows/test/badge.svg) 
 ![GitHub top language](https://img.shields.io/github/languages/top/themost-framework/test)
-[![License](https://img.shields.io/npm/l/@themost/test)](https://github.com/themost-framework/themost-test/blob/master/LICENSE)
+[![License](https://img.shields.io/npm/l/@themost/test)](https://github.com/themost-framework/test/blob/master/LICENSE)
 ![GitHub last commit](https://img.shields.io/github/last-commit/themost-framework/test)
 ![GitHub Release Date](https://img.shields.io/github/release-date/themost-framework/test)
 [![npm](https://img.shields.io/npm/dw/@themost/test)](https://www.npmjs.com/package/@themost%2Ftest)
