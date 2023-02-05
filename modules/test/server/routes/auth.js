@@ -7,40 +7,162 @@
  */
 import express from 'express';
 import fs from 'fs';
+import path from 'path';
 import {
+    ApplicationService,
     Args,
+    Guid,
     HttpBadRequestError,
     HttpForbiddenError,
-    HttpNotFoundError, HttpTokenExpiredError,
+    HttpTokenExpiredError,
     HttpTokenRequiredError,
-    HttpUnauthorizedError
+    HttpUnauthorizedError,
+    TraceUtils
 } from '@themost/common';
 import passport from 'passport';
 import BearerStrategy from 'passport-http-bearer';
+import { BasicStrategy } from 'passport-http';
 import jwt from 'jsonwebtoken';
 
 const User = require('../models/user-model');
-// noinspection JSUnusedGlobalSymbols
-/**
- * @param {{privateKey: string, publicKey: string}} options
- */
-function authRouter(options) {
 
-    
-    let _privateKey;
-    function getPrivateKey() {
-        if (_privateKey == null) {
-            return _privateKey = fs.readFileSync(options.privateKey);
+class Authenticator extends ApplicationService {
+    /**
+     * @param {import('@themost/express').ExpressDataApplication} app 
+     */
+    constructor(app) {
+        super(app);
+        const options = app.getConfiguration().getSourceAt('settings/jwt');
+        const executionPath = app.getConfiguration().getExecutionPath();
+        if (options && options.privateKey) {
+            const privateKey = fs.readFileSync(path.resolve(executionPath, options.privateKey.replace(/^~\//g, './')));
+            Object.defineProperty(this, 'privateKey', {
+                configurable: false,
+                enumerable: false,
+                value: privateKey
+            });
         }
-        return _privateKey;
-    }
-    let _publicKey;
-    function getPublicKey() {
-        if (_publicKey == null) {
-            return _publicKey = fs.readFileSync(options.publicKey);
+        if (options && options.publicKey) {
+            const publicKey = fs.readFileSync(path.resolve(executionPath, options.publicKey.replace(/^~\//g, './')));
+            Object.defineProperty(this, 'publicKey', {
+                configurable: false,
+                enumerable: false,
+                value: publicKey
+            });
         }
-        return _publicKey;
     }
+
+    /**
+     * 
+     * @param {import('@themost/data').DataContext} context 
+     * @param {{client_id: string,client_secret:string,username: string,password: string, grant_type: string,scope:string}} authenticateUser 
+     */
+    async authenticate(context, authenticateUser) {
+        Args.check(authenticateUser.grant_type === 'password',
+                new HttpBadRequestError('Invalid grant type. Expected grant type password'));
+        // validate client
+        const client = await context.model('AuthClient').where('client_id').equal(authenticateUser.client_id)
+            .silent()
+            .getTypedItem();
+        Args.check(client != null, new HttpBadRequestError('Invalid client.'));
+        // validate client secret
+        Args.check(client.client_secret === authenticateUser.client_secret, new HttpUnauthorizedError('Invalid client credentials'));
+        // validate scope
+        const hasScope = await client.hasScope(authenticateUser.scope);
+        Args.check(hasScope, new HttpBadRequestError('Invalid client scope.'));
+        // validate user
+        const validateUser = await User.validateUser(context, authenticateUser.username, authenticateUser.password);
+        Args.check(validateUser,
+            new HttpUnauthorizedError('Invalid user credentials'));
+        //get expiration timeout
+        const expirationTimeout = parseInt(context.application.getConfiguration().getSourceAt('auth/timeout') || 60, 10)*60*1000;
+        const expirationTimeoutSeconds = parseInt(expirationTimeout / 1000);
+        //calculate expiration time
+        const expires = new Date().getTime() + expirationTimeout;
+
+        const user = await context.model(User).where('name').equal(authenticateUser.username).silent().getItem();
+
+        // create JWT payload
+        const payload = {
+            sub: user.id,
+            jti: Guid.newGuid(),
+            aud: 'account',
+            exp: expires,
+            typ: 'Bearer',
+            iss: 'urn:themost-framework:test',
+            scope: authenticateUser.scope,
+            name: user.description,
+            username: user.name,
+            preferred_username: user.name
+        };
+        const access_token = jwt.sign(payload, this.privateKey, { algorithm: 'RS256' });
+        return {
+            access_token: access_token,
+            token_type: 'bearer',
+            expires_in: expirationTimeoutSeconds,
+            scope: authenticateUser.scope
+        };
+    }
+
+    /**
+     * @param {import('express').Request} req
+     */
+    async getRequestToken(req) {
+        // get authorization header
+        const authorizationHeader = req.header('Authorization');
+        Args.check(authorizationHeader, new HttpBadRequestError('Missing authorization header.'));
+        // split text and get client credentials
+        let match = /^Bearer\s(.*?)$/i.exec(authorizationHeader);
+        Args.check(match != null, new HttpBadRequestError('Invalid authorization header.'));
+        let access_token = match[1];
+        return this.getToken(req.context, access_token);
+    }
+
+    /**
+     * @param {import('@themost/data').DataContext} context 
+     * @param {string} access_token
+     */
+    async getToken(access_token) {
+        // validate token
+        let decoded
+        try {
+            decoded = jwt.verify(access_token, this.publicKey);
+        }
+        catch (err) {
+            if (err.name === 'JsonWebTokenError') {
+                TraceUtils.error(err);
+                decoded = null;
+            } else {
+                throw err;
+            }
+        }
+        
+        if (decoded == null) {
+            // return non-active response
+            return {
+                active: false
+            };
+        }
+        else {
+            // if token has been expired
+            if (new Date(decoded.exp).getTime() < new Date().getTime()) {
+                // return non-active response
+                return {
+                    active: false
+                };
+            }// return token info
+            return Object.assign(decoded, {
+                active: true
+            });
+        }
+    }
+
+
+
+}
+
+// noinspection JSUnusedGlobalSymbols
+function authRouter() {
 
     // passport bearer authorization strategy
     // https://github.com/jaredhanson/passport-http-bearer#usage
@@ -58,24 +180,29 @@ function authRouter(options) {
                 // throw 499 Token Required error
                 return done(new HttpTokenRequiredError());
             }
-            // get token info
-            // noinspection JSUnresolvedFunction
-            req.context.model('AccessToken').where('access_token').equal(token).silent().getItem().then(info => {
+
+            /**
+             * @type {Authenticator}
+             */
+            const authenticator = req.context.application.getService(Authenticator);
+            authenticator.getToken(token).then((info) => {
                 if (info == null) {
                     return done(new HttpTokenExpiredError());
                 }
-                if (new Date(info.expires).getTime() < new Date().getTime()) {
+                if (info.active === false) {
                     return done(new HttpTokenExpiredError());
                 }
-                // find user from token info
-                // noinspection JSUnresolvedFunction
-                return req.context.model('User').where('name').equal(info.user_id).silent().getItem().then( user => {
-                    // user cannot be found and of course cannot be authenticated (throw forbidden error)
+                const username = info.username;
+                return req.context.model('User').asQueryable().where((x) => {
+                    return x.name === username;
+                }, {
+                    username
+                }).silent().getItem().then((user) => {
                     if (user == null) {
                         return done(new HttpForbiddenError());
                     }
                     // check if user has enabled attribute
-                    if (Object.prototype.hasOwnProperty.call(user, 'enabled') && !user.enabled) {
+                    if (user.enabled === false) {
                         //if user.enabled is off throw forbidden error
                         return done(new HttpForbiddenError('Access is denied. User account is disabled.'));
                     }
@@ -98,145 +225,58 @@ function authRouter(options) {
         }
     ));
 
+    passport.use(new BasicStrategy({
+        passReqToCallback: true
+    }, (req, client_id, client_secret, done) => {
+        return req.context.model('AuthClient').asQueryable().where((x) => {
+            return x.client_id === client_id && x.client_secret === client_secret;
+        }, {
+            client_id,
+            client_secret
+        }).silent().getItem().then((client) => {
+            if (client === null) {
+                return done(new HttpForbiddenError('Invalid client credentials'));
+            }
+            return done(null, {
+                'name': client_id,
+                'authenticationType': 'Basic'
+            });
+        }).catch(err => {
+            return done(err);
+        });
+    }))
+
     let router = express.Router();
 
     router.post('/token', async function postToken (req, res, next) {
         try {
             // noinspection JSValidateTypes
-            /**
-             * @type {TokenReqBody}
-             */
-            const body = req.body;
-            // validate grant type
-            Args.check(body.grant_type === 'password',
-                new HttpBadRequestError('Invalid grant type. Expected grant type password'));
-            // validate client
-            const client = await req.context.model('AuthClient').where('client_id').equal(body.client_id)
-                .silent()
-                .getTypedItem();
-            Args.check(client != null, new HttpBadRequestError('Invalid client.'));
-            // validate client secret
-            Args.check(client.client_secret === body.client_secret, new HttpUnauthorizedError('Invalid client credentials'));
-            // validate scope
-            const hasScope = await client.hasScope(body.scope);
-            Args.check(hasScope, new HttpBadRequestError('Invalid client scope.'));
-            // validate user
-            const validateUser = await User.validateUser(req.context, body.username, body.password);
-            Args.check(validateUser,
-                new HttpUnauthorizedError('Invalid user credentials'));
-            //get expiration timeout
-            const expirationTimeout = parseInt(req.context.application.getConfiguration().getSourceAt('auth/timeout') || 60, 10)*60*1000;
-            const expirationTimeoutSeconds = parseInt(expirationTimeout / 1000);
-            //calculate expiration time
-            const expires = new Date().getTime() + expirationTimeout;
-
-            const user = await req.context.model(User).where('name').equal(body.username).silent().getItem();
-
-            const access_token = jwt.sign({
-                sub: user.name,
-                exp: expires,
-                name: user.description,
-                scope: body.scope.split(' '),
-                client_id: body.client_id
-            }, getPrivateKey(), { algorithm: 'RS256' });
-
-            const refresh_token = jwt.sign({
-                sub: user.name,
-                exp: expires,
-                name: user.description,
-                scope: body.scope.split(' '),
-                client_id: body.client_id
-            }, getPrivateKey(), { algorithm: 'RS256' });
-
-            return res.json({
-                access_token: access_token,
-                token_type: 'bearer',
-                expires_in: expirationTimeoutSeconds,
-                refresh_token: refresh_token,
-                scope: body.scope
-            });
-            
+            const result = await req.context.application.getService(Authenticator).authenticate(req.context, req.body);
+            return res.json(result);            
         }
         catch (err) {
             return next(err);
         }
     });
 
-    router.post('/token_info', async function postTokenInfo (req, res, next) {
+    router.post('/token_info', passport.authenticate('basic', { session: false }), async function postTokenInfo (req, res, next) {
         try {
-            // noinspection JSValidateTypes
-            /**
-             * @type {TokenInfoReqBody}
-             */
-            const body = req.body;
-            // get authorization header
-            const authorizationHeader = req.header('Authorization');
-            Args.check(authorizationHeader, new HttpUnauthorizedError('Missing client credentials.'));
-            // convert base64 header to string
-            let buff = Buffer.from(authorizationHeader.replace(/^Basic\s+/,''), 'base64');
-            let authorizationHeaderText = buff.toString('ascii');
-            // split text and get client credentials
-            let match = /^(.*?):(.*?)$/.exec(authorizationHeaderText);
-            Args.check(match != null, new HttpBadRequestError('Invalid authorization header.'));
-            let client_id = match[1];
-            let client_secret = match[2];
-            // validate client
-            const client = await req.context.model('AuthClient').where('client_id').equal(client_id)
-                .and('client_secret').equal(client_secret).silent().getItem();
-            Args.check(client != null, new HttpUnauthorizedError('Invalid client credentials.'));
-
-            // validate toke
-            const decoded = jwt.verify(body.token, getPublicKey());
-
-            if (decoded == null) {
-                // return non-active response
-                return res.json({
-                    active: false
-                });
-            }
-            else {
-                // if token has been expired
-                if (new Date(decoded.exp).getTime() < new Date().getTime()) {
-                    // return non-active response
-                    return res.json({
-                        active: false
-                    });
-                }// return token info
-                return res.json(Object.assign(decoded, {
-                    active: true
-                }));
-            }
+            const info = await req.context.application.getService(Authenticator).getToken(req.body && req.body.token);
+            return res.json(info);
         }
         catch (err) {
             return next(err);
         }
     });
 
-    router.get('/me', async function getMe(req, res, next){
+    router.get('/me', passport.authenticate('bearer', { session: false }), async function getMe(req, res, next){
         try {
-            // get authorization header
-            const authorizationHeader = req.header('Authorization');
-            Args.check(authorizationHeader, new HttpBadRequestError('Missing authorization header.'));
-            // split text and get client credentials
-            let match = /^Bearer\s(.*?)$/i.exec(authorizationHeader);
-            Args.check(match != null, new HttpBadRequestError('Invalid authorization header.'));
-            let token = match[1];
-            // get token info
-            const item = await req.context.model('AccessToken')
-                .where('access_token').equal(token)
-                .silent()
-                .getItem();
-            Args.check(item, new HttpForbiddenError());
-            // check active
-            const active = new Date(item.expires).getTime() >= new Date().getTime();
-            Args.check(active, new HttpForbiddenError());
-            // get user
-            const user = await req.context.model('User')
-                .where('name').equal(item.user_id)
-                .silent()
-                .getItem();
-            Args.check(user, new HttpNotFoundError());
-            // and return
+            const username = req.context && req.context.user && req.context && req.context.user.name;
+            const user = await req.context.model('User').asQueryable().where((x) => {
+                return x.name === username;
+            }, {
+                username
+            }).expand((x) => x.groups).getItem();
             return res.json(user);
         }
         catch (err) {
@@ -342,4 +382,4 @@ function authRouter(options) {
     return router;
 }
 
-export {authRouter};
+export {authRouter, Authenticator};

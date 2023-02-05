@@ -10,6 +10,7 @@ import {indexRouter} from './routes/index';
 import temp from 'temp';
 import fs from 'fs';
 import cors from 'cors';
+import { Authenticator } from './routes/auth';
 
 function getApplication() {
   const config = require('./config/app.json');
@@ -60,6 +61,11 @@ app.use(cors({ origin:true, credentials: true }));
 
 // @themost/data data application setup
   const dataApplication = new ExpressDataApplication(path.resolve(__dirname, 'config'));
+
+  if (dataApplication.hasService(Authenticator) === false) {
+    dataApplication.useService(Authenticator);
+  }
+
 // hold data application
   app.set('ExpressDataApplication', dataApplication);
 
@@ -69,10 +75,7 @@ app.use(cors({ origin:true, credentials: true }));
   app.use('/', indexRouter);
 
   // pass RSA private and public keys
-  app.use('/auth/', authRouter({
-    privateKey: path.resolve(__dirname, 'config', 'private.key'),
-    publicKey: path.resolve(__dirname, 'config', 'public.pem')
-  }));
+  app.use('/auth/', authRouter());
 
 // use @themost/express service router
 // noinspection JSCheckFunctionSignatures
