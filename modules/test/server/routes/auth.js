@@ -310,46 +310,33 @@ function authRouter() {
             // validate user name and password
             const username = req.body.username;
             Args.notEmpty(username, 'Username');
-            Args.notEmpty(req.body.password, 'Password');
+
+            const password = req.body.password;
+            Args.notEmpty(password, 'Password');
+
+            const scope = req.query.scope || 'profile';
+
+            const grant_type = 'password';
             
             const client = await req.context.model('AuthClient').where('client_id').equal(client_id)
                 .silent().getItem();
             Args.check(client != null, new HttpUnauthorizedError('Invalid client.'));
-            const validateUser = await User.validateUser(req.context, username, req.body.password);
-            Args.check(validateUser,
-                new HttpUnauthorizedError('Wrong user name or bad password'));
-            const scope = req.query.scope || 'profile';
-            //get expiration timeout
-            const expirationTimeout = parseInt(req.context.application.getConfiguration().getSourceAt('auth/timeout') || 60, 10)*60*1000;
-            const expirationTimeoutSeconds = parseInt(expirationTimeout / 1000);
-            const secret = req.context.application.getConfiguration().getSourceAt('settings/crypto/key');
-            //calculate expiration time
-            const expires = new Date().getTime() + expirationTimeout;
-            //create new token or update an existing one
-            let token = await req.context.model('AccessToken')
-                .where('client_id').equal(client_id)
-                .and('user_id').equal(username)
-                .and('scope').equal(scope)
-                .and('expires').lowerOrEqual(new Date())
-                .silent()
-                .getItem();
-            if (token) {
-                token.expires = new Date(expires);
-            } else {
-                token = {
-                    client_id: client_id,
-                    user_id: username,
-                    scope: scope,
-                    expires: new Date(expires)
-                };
-            }
-            await req.context.model('AccessToken').silent().save(token);
+            const client_secret = client.client_secret;
+
+            const token = await req.context.application.getService(Authenticator).authenticate(req.context, {
+                client_id,
+                client_secret,
+                username,
+                password,
+                grant_type,
+                scope
+            });
             // and redirect
             const state = req.query.state;
             if (state) {
-                return res.redirect(`${redirect_uri}?access_token=${token.access_token}&scope=${scope}&refresh_token=${token.refresh_token}&state=${state}`);
+                return res.redirect(`${redirect_uri}?access_token=${token.access_token}&scope=${scope}&state=${state}`);
             }
-            return res.redirect(`${redirect_uri}?access_token=${token.access_token}&scope=${scope}&refresh_token=${token.refresh_token}`);
+            return res.redirect(`${redirect_uri}?access_token=${token.access_token}&scope=${scope}`);
         } catch(err) {
             res.render('login', { title: 'test api server', error: err });
         }
