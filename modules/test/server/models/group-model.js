@@ -1,5 +1,5 @@
 import {EdmMapping} from '@themost/data';
-let Account = require('./account-model');
+import { Account } from './account-model';
 /**
  * @class
  

@@ -1,6 +1,6 @@
 import {EdmMapping} from '@themost/data';
 import {TextUtils} from '@themost/common';
-let Account = require('./account-model');
+import { Account } from './account-model';
 /**
  * @class
 
@@ -57,4 +57,6 @@ class User extends Account {
     }
 
 }
-module.exports = User;
+export {
+    User
+}

@@ -23,8 +23,7 @@ import passport from 'passport';
 import BearerStrategy from 'passport-http-bearer';
 import { BasicStrategy } from 'passport-http';
 import jwt from 'jsonwebtoken';
-
-const User = require('../models/user-model');
+import { User } from '../models/user-model';
 
 class Authenticator extends ApplicationService {
     /**

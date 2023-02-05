@@ -11,7 +11,7 @@ export function beforeSave(event, callback) {
  * @param {Function} callback
  */
 export function afterSave(event, callback) {
-    if (event.state === 1 && event.target && event.target.hasOwnProperty('userCredentials')) {
+    if (event.state === 1 && event.target && Object.prototype.hasOwnProperty.call(event.target, 'userCredentials')) {
         return event.model.context.model('UserCredential')
             .silent()
             .insert(Object.assign(event.target.userCredentials, {
