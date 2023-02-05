@@ -17,7 +17,6 @@ import {EdmMapping, DataObject} from '@themost/data';
  * @property {Date} dateModified
  * @property {number} createdBy
  * @property {number} modifiedBy
- * @augments {DataObject}
  */
 @EdmMapping.entityType('Thing')
 class Thing extends DataObject {
@@ -28,4 +27,6 @@ class Thing extends DataObject {
         super();
     }
 }
-module.exports = Thing;
+export {
+    Thing
+}

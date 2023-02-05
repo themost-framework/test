@@ -85,7 +85,7 @@ describe('app', function () {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
-                'Authorization': `Basic ${new Buffer('9165351833584149:hTgqFBUhCfHs/quf/wnoB+UpDSfUusKA').toString('base64')}`,
+                'Authorization': `Basic ${Buffer.from('9165351833584149:hTgqFBUhCfHs/quf/wnoB+UpDSfUusKA').toString('base64')}`,
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
             body: new URLSearchParams({

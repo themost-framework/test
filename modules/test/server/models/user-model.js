@@ -1,6 +1,6 @@
 import {EdmMapping} from '@themost/data';
 import {TextUtils} from '@themost/common';
-let Account = require('./account-model');
+import { Account } from './account-model';
 /**
  * @class
 
@@ -11,7 +11,6 @@ let Account = require('./account-model');
  * @property {Array<Group|any>} groups
  * @property {number} userFlags
  * @property {number} id
- * @augments {DataObject}
  */
 @EdmMapping.entityType('User')
 class User extends Account {
@@ -58,4 +57,6 @@ class User extends Account {
     }
 
 }
-module.exports = User;
+export {
+    User
+}
