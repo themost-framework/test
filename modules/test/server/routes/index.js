@@ -6,4 +6,8 @@ indexRouter.get('/', (req, res) => {
   res.render('index', { title: 'test api server' });
 });
 
+indexRouter.get('/', (req, res) => {
+  res.render('index', { title: 'test api server' });
+});
+
 export {indexRouter};

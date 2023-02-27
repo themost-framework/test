@@ -11,6 +11,7 @@ import temp from 'temp';
 import fs from 'fs';
 import cors from 'cors';
 import { Authenticator } from './routes/auth';
+import { docsRouter } from './routes/docs';
 
 function getApplication() {
   const config = require('./config/app.json');
@@ -47,6 +48,7 @@ function getApplication() {
 // enable CORS
 app.use(cors({ origin:true, credentials: true }));
 
+app.use('/assets', express.static(path.join(__dirname, 'assets')))
 
 // use ViewEngine for all ejs templates
   app.engine('ejs', ViewEngine.express());
@@ -76,6 +78,8 @@ app.use(cors({ origin:true, credentials: true }));
 
   // pass RSA private and public keys
   app.use('/auth/', authRouter());
+
+  app.use('/api/docs', docsRouter);
 
 // use @themost/express service router
 // noinspection JSCheckFunctionSignatures

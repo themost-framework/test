@@ -1,5 +1,9 @@
 {
     "settings": {
+        "app": {
+            "title": "Test API Server",
+            "name": "@themost-framework"
+        },
         "crypto": {
             "algorithm": "aes256",
             "key": "08b23087b9b4344cd1f7a21acb52a1f615b31ddf85ac6941e046508990b1a268dbaba02af1187e778b6070434500978b"
