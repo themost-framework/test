@@ -1,3 +1,32 @@
-<h1><%= message %></h1>
-<h2><%= error.status %></h2>
-<pre><%= error.stack %></pre>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Error <%= (error.statusCode || '500').toString()%> | @themost-framework | Test API Server</title>
+    <!-- Google font -->
+    <link href="https://fonts.googleapis.com/css?family=Raleway:400,700" rel="stylesheet">
+    <style>
+        *{-webkit-box-sizing:border-box;box-sizing:border-box}body{padding:64px 64px;margin:0}#error{position:relative}#error .error{position:relative}.error{line-height:1.4}.error h2{font-family:Raleway,sans-serif;color:#292929;font-size:28px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;margin-top:0}.error p{font-family:Raleway,sans-serif;font-size:14px;font-weight:400;margin-top:0;margin-bottom:15px;color:#333}.error p.stack{font-family:monospace;font-size:100%;color:#333}.error a{font-family:Raleway,sans-serif;font-size:14px;text-decoration:none;text-transform:uppercase;background:#fff;display:inline-block;padding:15px 30px;border-radius:40px;color:#292929;font-weight:700;-webkit-box-shadow:0 4px 15px -5px rgba(0,0,0,.3);box-shadow:0 4px 15px -5px rgba(0,0,0,.3);-webkit-transition:.2s all;transition:.2s all}.error a:hover{color:#fff;background-color:#3700b3}@media only screen and (max-width:480px){.error{text-align:center}.error{padding-left:15px;padding-right:15px}}
+    </style>
+</head>
+<body>
+
+    <div id="error">
+        <div class="error">
+            <h2><%=(error.statusCode || 500)%></h2>
+            <p><%=error.message%></p>
+            <% if (process.env.NODE_ENV === 'development' && error.innerMessage) { %>
+                <p>
+                    <%=(error.innerMessage)%>
+                </p>
+            <% } %>
+            <% if (process.env.NODE_ENV === 'development' && error.stack) { %>
+                    <p class="stack"><%= error.stack %></p>
+            <% } %>
+            <a href="/">home</a>
+        </div>
+    </div>
+</body>
+</html>
