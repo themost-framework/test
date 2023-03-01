@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "description": "MOST Web Framework Codename Blueshift Test Api Server",
   "repository": " https://github.com/themost-framework/themost-test.git",
-  "private": true,
+  "license": "BSD-3-Clause",
   "author": "Kyriakos Barbounakis<k.barbounakis@gmail.com>",
   "scripts": {
     "ci-sub-modules": "cd modules/test && npm ci",
