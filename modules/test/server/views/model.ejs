@@ -1,0 +1,53 @@
+<% layout('master') -%>
+<section class="page-section mt-5">
+    <div class="container">
+        <div class="row">
+            <div>
+                <h2 class="mb-3">
+                    <h3 class="d-inline-block"><%=model.name%></h3>
+                    <% if (model.inherits) { %>
+                        <h6 class="d-inline-block fw-normal" class="text-muted">inherits 
+                            <a class="text-decoration-none" href="./<%=model.inherits%>">
+                                <span><%=model.inherits%></span>
+                            </a>
+                    </h6>    
+                    <% } %>
+                    <% if (model.implements) { %>
+                        <h6 class="d-inline-block fw-normal" class="text-muted">implements 
+                            <a class="text-decoration-none" href="./<%=model.implements%>">
+                                <span><%=model.implements%></span>
+                            </a>
+                        </h6>    
+                    <% } %>
+                </h2>
+                <div>
+                    <ul class="list-group">
+                        <% for(const attribute of model.attributes) { %>
+                            <li class="list-group-item py-3">
+                                <a>
+                                    <span class="lead"><%=attribute.name%></span>
+
+                                    <small class="text-muted">
+                                        <%=attribute.type%><%=attribute.many === true ? '[]' : ''%>
+                                    </small>
+                                    <% if (attribute.model != null && attribute.model !== model.name) { %>
+                                        <br>
+                                        <small class="text-muted">inherited by 
+                                            <a class="text-decoration-none" href="./<%=attribute.model%>">
+                                                <span><%=attribute.model%></span>
+                                            </a>
+                                        </small>
+                                    <% } %>
+                                    <% if (attribute.description) { %>
+                                    <br>
+                                    <small class="text-muted"><%-attribute.description%></small>
+                                    <%}%>
+                                </a>
+                            </li>
+                        <% } %>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

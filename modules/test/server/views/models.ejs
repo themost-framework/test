@@ -1,0 +1,35 @@
+<% layout('master') -%>
+<section class="page-section mt-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div>
+                <h2 class="mb-3 text-uppercase">Entity types</h2>
+                <div>
+                    <ul class="list-group">
+                        <% for(const model of models) { %>
+                            <li class="list-group-item py-3">
+                                <a class="text-decoration-none" href="./models/<%=model.name%>">
+                                    <span class="lead"><%= model.name%></span>
+                                </a>
+                                <% if (model.implements) { %>
+                                    <small class="text-muted">implements 
+                                        <a class="text-decoration-none" href="./models/<%=model.implements%>">
+                                            <span><%= model.implements%></span>
+                                        </a>
+                                    </small>    
+                                <% } %>
+                                <% if (model.inherits) { %>
+                                    <small class="text-muted">inherits 
+                                        <a class="text-decoration-none" href="./models/<%=model.inherits%>">
+                                            <span><%= model.inherits%></span>
+                                        </a>
+                                    </small>    
+                                <% } %>
+                            </li>
+                        <% } %>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
