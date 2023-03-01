@@ -5,12 +5,11 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/themost-framework/test)
 ![GitHub Release Date](https://img.shields.io/github/release-date/themost-framework/test)
 [![npm](https://img.shields.io/npm/dw/@themost/test)](https://www.npmjs.com/package/@themost%2Ftest)
-[![Snyk Vulnerabilities for npm package](https://img.shields.io/snyk/vulnerabilities/npm/@themost/test)](https://snyk.io/vuln/npm:%40themost%2Ftest)
 
 ## @themost/test
-MOST Web Framework Codename Blueshift Test Api Server
+[@themost-framework](https://github.com/themost-framework) Test API Server
 
-This project contains a test api server for testing libraries and modules.
+![Test API Server](./server/assets/img/screenshot1.png)
 
 ### Installation
 
@@ -18,11 +17,60 @@ This project contains a test api server for testing libraries and modules.
         
 ### Usage
 
-`@themost/test` may be started as standalone application by using the following command:
+Start a standalone instance of test api server:
 
-    npx @themost/test [--port] [--host]
+        npx @themost/test [--port <port>] [--host <host>]
 
-or being started it as backend server in any testing environment:
+Get a bearer token using `password grant` flow (read more at https://www.oauth.com/oauth2-servers/access-tokens/password-grant/)
+
+    curl --location 'http://localhost:3000/auth/token' \
+    --header 'Content-Type: application/x-www-form-urlencoded' \
+    --data-urlencode 'client_id=9165351833584149' \
+    --data-urlencode 'client_secret=hTgqFBUhCfHs/quf/wnoB+UpDSfUusKA' \
+    --data-urlencode 'username=alexis.rees@example.com' \
+    --data-urlencode 'password=secret' \
+    --data-urlencode 'grant_type=password' \
+    --data-urlencode 'scope=profile'
+
+>   
+    {
+      "access_token": "<access token>",
+      "token_type": "bearer",
+      "expires_in": 3600,
+      "scope": "profile"
+    }
+
+and start making requests for getting data from test api server by using OData v4 protocol 
+(read more at http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html)
+
+e.g. get products
+
+    curl --location 'http://localhost:3000/api/Products?%24select=category%2Cprice%2Cmodel%2CreleaseDate%2Cname' \
+    --header 'Authorization: Bearer <access token>'
+
+with response:
+
+    {
+      "value": [
+        {
+            "category": "Laptops",
+            "price": 444.76,
+            "model": "SR2155",
+            "releaseDate": "2019-04-21T16:43:59.000Z",
+            "name": "Apple MacBook Air (13.3-inch, 2013 Version)"
+        },
+        {
+            "category": "Laptops",
+            "price": 357.84,
+            "model": "LD1737",
+            "releaseDate": "2019-01-14T08:49:33.000Z",
+            "name": "Apple MacBook Pro With Retina Display (15-inch, 2013 Version)"
+        }
+        ...
+      ]
+    }
+
+or create a jasmine test spec and start testing api server
 
         import { getApplication, serveApplication, getServerAddress } from "@themost/test";
         import fetch from "node-fetch";
