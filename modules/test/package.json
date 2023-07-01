@@ -1,6 +1,6 @@
 {
   "name": "@themost/test",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "MOST Web Framework Test Api Server",
   "repository": "https://github.com/themost-framework/themost-test.git",
   "author": "Kyriakos Barbounakis<k.barbounakis@gmail.com>",
