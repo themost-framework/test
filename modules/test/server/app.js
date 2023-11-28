@@ -12,6 +12,7 @@ import fs from 'fs';
 import cors from 'cors';
 import { Authenticator } from './routes/auth';
 import { docsRouter } from './routes/docs';
+import createError from 'http-errors';
 
 function getApplication() {
   const config = require('./config/app.json');
@@ -85,16 +86,40 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')))
 // noinspection JSCheckFunctionSignatures
   app.use('/api/', passport.authenticate('bearer', { session: false }), serviceRouter);
 
+// catch 404 and forward to error handler
+  app.use((_req, _res, next) => {
+    next(createError(404));
+  });
 // error handler
   app.use((err, req, res, next) => {
     if (res.headersSent) {
       return next(err)
     }
+    const isDev = ['development', 'test'].includes(req.app.get('env'));
+    if (req.get('accept') === 'application/json') {
+      // get error object
+      const error = Object.getOwnPropertyNames(err).filter((key) => {
+        return key !== 'stack' || (key === 'stack' && isDev);
+      }).reduce((acc, key) => {
+        acc[key] = err[key];
+        return acc;
+      }, {});
+      const proto = Object.getPrototypeOf(err);
+      if (proto && proto.constructor && proto.constructor.name) {
+        error.name = proto.constructor.name;
+      }
+      // return error as json
+      return res.status(err.status || err.statusCode || 500).json(error);
+    }
     // set locals, only providing error in development
     res.locals = {
-      message: err.message,
-      error: req.app.get('env') === 'development' ? err : { }
+      message: err.message
     };
+    if (isDev) {
+      Object.assign(res.locals, {
+        error: err
+      });
+    }
     // render the error page
     res.status(err.status || err.statusCode || 500);
     res.render('error');
