@@ -19,7 +19,6 @@ import {
     HttpUnauthorizedError,
     TraceUtils
 } from '@themost/common';
-import passport from 'passport';
 import BearerStrategy from 'passport-http-bearer';
 import { BasicStrategy } from 'passport-http';
 import jwt from 'jsonwebtoken';
@@ -161,7 +160,7 @@ class Authenticator extends ApplicationService {
 }
 
 // noinspection JSUnusedGlobalSymbols
-function authRouter() {
+function authRouter(passport) {
 
     // passport bearer authorization strategy
     // https://github.com/jaredhanson/passport-http-bearer#usage

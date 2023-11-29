@@ -32,6 +32,23 @@ describe('app', function () {
         await promisify(server.close).bind(server)();
     });
 
+    it('should get json error', async () => {
+        // serve
+        const server = await serveApplication(getApplication());
+        const base = getServerAddress(server);
+        // get metadata
+        const response = await fetch(new URL('/missing', base), {
+            headers: {
+                'Accept': 'application/json'
+            }
+        }); 
+        expect(response.ok).toBeFalsy();
+        const body = await response.json();
+        expect(body).toBeTruthy();
+        // close server
+        await promisify(server.close).bind(server)();
+    });
+
     it('should post /auth/token', async () => {
         // serve
         const server = await serveApplication(getApplication());
