@@ -79,7 +79,7 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')))
   app.use('/', indexRouter);
 
   // pass RSA private and public keys
-  app.use('/auth/', authRouter());
+  app.use('/auth/', authRouter(passport));
 
   app.use('/api/docs', docsRouter);
 
