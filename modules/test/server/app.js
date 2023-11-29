@@ -84,7 +84,14 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')))
 
 // use @themost/express service router
 // noinspection JSCheckFunctionSignatures
-  app.use('/api/', passport.authenticate('bearer', { session: false }), serviceRouter);
+  app.use('/api/', (req, res, next) => {
+    passport.authenticate('bearer', { session: false })(req, res, (err) => {
+      if (err) {
+        return next(err);
+      }
+      return next();
+    });
+  }, serviceRouter);
 
 // catch 404 and forward to error handler
   app.use((_req, _res, next) => {
@@ -95,11 +102,11 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')))
     if (res.headersSent) {
       return next(err)
     }
-    const isDev = ['development', 'test'].includes(req.app.get('env'));
+    const isDevOrTest = req.app.get('env') === 'development' || req.app.get('env') === 'test';
     if (req.get('accept') === 'application/json') {
       // get error object
       const error = Object.getOwnPropertyNames(err).filter((key) => {
-        return key !== 'stack' || (key === 'stack' && isDev);
+        return key !== 'stack' || (key === 'stack' && isDevOrTest);
       }).reduce((acc, key) => {
         acc[key] = err[key];
         return acc;
@@ -115,7 +122,7 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')))
     res.locals = {
       message: err.message
     };
-    if (isDev) {
+    if (isDevOrTest) {
       Object.assign(res.locals, {
         error: err
       });

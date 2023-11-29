@@ -37,7 +37,11 @@ describe('app', function () {
         const server = await serveApplication(getApplication());
         const base = getServerAddress(server);
         // get metadata
-        const response = await fetch(new URL('/api/missing', base));
+        const response = await fetch(new URL('/missing', base), {
+            headers: {
+                'Accept': 'application/json'
+            }
+        }); 
         expect(response.ok).toBeFalsy();
         const body = await response.json();
         expect(body).toBeTruthy();
