@@ -13,6 +13,7 @@ import cors from 'cors';
 import { Authenticator } from './routes/auth';
 import { docsRouter } from './routes/docs';
 import createError from 'http-errors';
+import {HttpUnauthorizedError} from '@themost/common';
 
 function getApplication() {
   const config = require('./config/app.json');
@@ -85,12 +86,14 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')))
 // use @themost/express service router
 // noinspection JSCheckFunctionSignatures
   app.use('/api/', (req, res, next) => {
-    passport.authenticate('bearer', { session: false })(req, res, (err) => {
-      if (err) {
-        return next(err);
+    passport.authenticate('bearer', { session: false }, (err, user) => {
+      if (err) { return next(err); }
+      if (!user) {
+        return next(new HttpUnauthorizedError());
       }
+      req.user = user;
       return next();
-    });
+    })(req, res, next);
   }, serviceRouter);
 
 // catch 404 and forward to error handler
