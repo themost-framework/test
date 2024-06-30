@@ -1,6 +1,6 @@
 {
   "name": "themost-test-src",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "description": "MOST Web Framework Codename Blueshift Test Api Server",
   "repository": " https://github.com/themost-framework/themost-test.git",
   "license": "BSD-3-Clause",
@@ -23,7 +23,7 @@
     "@babel/register": "^7.22.5",
     "@babel/runtime": "^7.22.5",
     "@themost/cli": "^2.5.7",
-    "@themost/client": "^2.15.0",
+    "@themost/client": "^2.16.0",
     "@themost/common": "^2.10.4",
     "@themost/data": "^2.11.4",
     "@themost/ejs": "^2.0.1",
