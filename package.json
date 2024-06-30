@@ -23,7 +23,7 @@
     "@babel/register": "^7.22.5",
     "@babel/runtime": "^7.22.5",
     "@themost/cli": "^2.5.7",
-    "@themost/client": "^2.15.0",
+    "@themost/client": "^2.16.0",
     "@themost/common": "^2.10.4",
     "@themost/data": "^2.11.4",
     "@themost/ejs": "^2.0.1",
