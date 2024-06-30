@@ -190,12 +190,9 @@ function authRouter(passport) {
                 if (info.active === false) {
                     return done(new HttpTokenExpiredError());
                 }
-                const username = info.username;
-                return req.context.model('User').asQueryable().where((x) => {
+                return req.context.model('User').asQueryable().where((x, username) => {
                     return x.name === username;
-                }, {
-                    username
-                }).silent().getItem().then((user) => {
+                }, info.username).silent().getItem().then((user) => {
                     if (user == null) {
                         return done(new HttpForbiddenError());
                     }
@@ -226,12 +223,9 @@ function authRouter(passport) {
     passport.use(new BasicStrategy({
         passReqToCallback: true
     }, (req, client_id, client_secret, done) => {
-        return req.context.model('AuthClient').asQueryable().where((x) => {
+        return req.context.model('AuthClient').asQueryable().where((x, client_id, client_secret) => {
             return x.client_id === client_id && x.client_secret === client_secret;
-        }, {
-            client_id,
-            client_secret
-        }).silent().getItem().then((client) => {
+        }, client_id, client_secret).silent().getItem().then((client) => {
             if (client === null) {
                 return done(new HttpForbiddenError('Invalid client credentials'));
             }
@@ -270,11 +264,9 @@ function authRouter(passport) {
     router.get('/me', passport.authenticate('bearer', { session: false }), async function getMe(req, res, next){
         try {
             const username = req.context && req.context.user && req.context && req.context.user.name;
-            const user = await req.context.model('User').asQueryable().where((x) => {
+            const user = await req.context.model('User').asQueryable().where((x, username) => {
                 return x.name === username;
-            }, {
-                username
-            }).expand((x) => x.groups).getItem();
+            }, username).expand((x) => x.groups).getItem();
             return res.json(user);
         }
         catch (err) {

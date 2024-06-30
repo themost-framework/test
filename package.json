@@ -29,7 +29,7 @@
     "@themost/ejs": "^2.0.1",
     "@themost/express": "^1.7.0",
     "@themost/node": "^2.5.2",
-    "@themost/query": "^2.11.4",
+    "@themost/query": "^2.12.0",
     "@themost/sqlite": "^2.7.0",
     "@themost/web": "^2.7.0",
     "@themost/xml": "^2.5.2",
