@@ -52,7 +52,7 @@ describe('app', function() {
       },
       body: new URLSearchParams({
         client_id: '9165351833584149',
-        client_secret: 'hTgqFBUhCfHs/quf/wnoB+UpDSfUusKA',
+        client_secret: 'hTgqFBUhCfHs/quf/wnoB_UpDSfUusKA',
         username: 'alexis.rees@example.com',
         password: 'secret',
         grant_type: 'password',
@@ -78,7 +78,7 @@ describe('app', function() {
       },
       body: new URLSearchParams({
         client_id: '9165351833584149',
-        client_secret: 'hTgqFBUhCfHs/quf/wnoB+UpDSfUusKA',
+        client_secret: 'hTgqFBUhCfHs/quf/wnoB_UpDSfUusKA',
         username: 'alexis.rees@example.com',
         password: 'secret',
         grant_type: 'password',
@@ -92,7 +92,7 @@ describe('app', function() {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'Authorization': `Basic ${Buffer.from('9165351833584149:hTgqFBUhCfHs/quf/wnoB+UpDSfUusKA').toString('base64')}`,
+        'Authorization': `Basic ${Buffer.from('9165351833584149:hTgqFBUhCfHs/quf/wnoB_UpDSfUusKA').toString('base64')}`,
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       body: new URLSearchParams({
@@ -120,7 +120,7 @@ describe('app', function() {
       },
       body: new URLSearchParams({
         client_id: '9165351833584149',
-        client_secret: 'hTgqFBUhCfHs/quf/wnoB+UpDSfUusKA',
+        client_secret: 'hTgqFBUhCfHs/quf/wnoB_UpDSfUusKA',
         username: 'alexis.rees@example.com',
         password: 'secret',
         grant_type: 'password',

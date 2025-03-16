@@ -26,7 +26,7 @@ Get a bearer token using `password grant` flow (read more at https://www.oauth.c
     curl --location 'http://localhost:3000/auth/token' \
     --header 'Content-Type: application/x-www-form-urlencoded' \
     --data-urlencode 'client_id=9165351833584149' \
-    --data-urlencode 'client_secret=hTgqFBUhCfHs/quf/wnoB+UpDSfUusKA' \
+    --data-urlencode 'client_secret=hTgqFBUhCfHs/quf/wnoB_UpDSfUusKA' \
     --data-urlencode 'username=alexis.rees@example.com' \
     --data-urlencode 'password=secret' \
     --data-urlencode 'grant_type=password' \
