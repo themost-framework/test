@@ -10,7 +10,7 @@ import {URL, URLSearchParams} from 'url';
 import {HttpError} from '@themost/common';
 
 const TEST_CLIENT_ID = '9165351833584149';
-const TEST_CLIENT_SECRET = 'hTgqFBUhCfHs/quf/wnoB+UpDSfUusKA';
+const TEST_CLIENT_SECRET = 'hTgqFBUhCfHs/quf/wnoB_UpDSfUusKA';
 
 /**
  * @param {string} server_uri

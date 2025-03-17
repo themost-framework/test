@@ -14,6 +14,7 @@ import { Authenticator } from './routes/auth';
 import { docsRouter } from './routes/docs';
 import createError from 'http-errors';
 import { HttpUnauthorizedError } from '@themost/common';
+import { DataCacheStrategy } from "@themost/data";
 
 function getApplication() {
   const config = require('./config/app.json');
@@ -147,4 +148,22 @@ function getApplication() {
   return app;
 }
 
-export { getApplication };
+/**
+ *
+ * @param {import('express').Application} app
+ * @returns {Promise<void>}
+ */
+async function finalizeApplication(app) {
+  /**
+   * @type {ExpressDataApplication}
+   */
+  const dataApplication = app.get('ExpressDataApplication');
+  if (dataApplication) {
+    const service = dataApplication.getConfiguration().getStrategy(DataCacheStrategy);
+    if (typeof service.finalize === 'function') {
+      await service.finalize();
+    }
+  }
+}
+
+export { getApplication, finalizeApplication };

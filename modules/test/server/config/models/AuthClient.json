@@ -86,7 +86,7 @@
         {
             "name": "Test Api Server",
             "client_id": "9165351833584149",
-            "client_secret": "hTgqFBUhCfHs/quf/wnoB+UpDSfUusKA",
+            "client_secret": "hTgqFBUhCfHs/quf/wnoB_UpDSfUusKA",
             "redirect_uri": "http://localhost:3000/*",
             "scopes": [
                 {
