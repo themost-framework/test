@@ -8,6 +8,7 @@
  */
 import {serveApplication} from './serve';
 import debug from 'debug';
+import path from 'path';
 import {getApplication} from './app';
 import { Command, Option } from 'commander';
 const log = debug('themost-framework:test');
@@ -20,9 +21,17 @@ const log = debug('themost-framework:test');
             .version('2')
             .addOption(new Option('-p, --port <number>', 'port number').env('PORT'))
             .addOption(new Option('-h, --host <string>', 'host address').env('IP'))
+            .addOption(new Option('-a, --path <string>', 'application path'))
         program.parse();
         const args = program.opts();
-        await serveApplication(getApplication(), args.port, args.host);
+        /**
+         * @type string
+         */
+        let cwd;
+        if (args.path) {
+            cwd = path.resolve(process.cwd(), args.path);
+        }
+        await serveApplication(getApplication(cwd), args.port, args.host);
     }
     catch(err) {
         log(err);

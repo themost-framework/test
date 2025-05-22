@@ -15,21 +15,36 @@ import { docsRouter } from './routes/docs';
 import createError from 'http-errors';
 import { HttpUnauthorizedError } from '@themost/common';
 import { DataCacheStrategy } from "@themost/data";
+import config from './config/app.json';
 
-function getApplication() {
-  const config = require('./config/app.json');
-  // prepare temp database
-  const findAdapter = config.adapters.find(adapter => {
-    return adapter.name === 'test';
-  });
-  let testDatabase;
-  if (findAdapter) {
-    // get temp database path
-    testDatabase = temp.path('.db');
-    // copy database to temp path
-    fs.copyFileSync(path.resolve(__dirname, 'db/local.db'), testDatabase);
-    // update database path
-    findAdapter.options.database = testDatabase;
+/**
+ * @param {string} cwd
+ * @returns {Express}
+ */
+function getApplication(cwd) {
+
+  // resolve application directory
+  let applicationDir = __dirname;
+  if (typeof cwd === 'string' && cwd.length > 0) { // if current directory is defined
+    applicationDir = path.resolve(process.cwd(), cwd);
+  }
+  // if application is the current directory
+  if (applicationDir === __dirname) {
+    // prepare to create a copy of test database
+    const config = require('./config/app.json');
+    // prepare temp database
+    const findAdapter = config.adapters.find(adapter => {
+      return adapter.name === 'test';
+    });
+    let testDatabase;
+    if (findAdapter) {
+      // get temp database path
+      testDatabase = temp.path('.db');
+      // copy database to temp path
+      fs.copyFileSync(path.resolve(__dirname, 'db/local.db'), testDatabase);
+      // update database path
+      findAdapter.options.database = testDatabase;
+    }
   }
   /**
    * @name Request#context
@@ -65,7 +80,16 @@ function getApplication() {
   app.use(express.urlencoded({ extended: true }));
 
   // @themost/data data application setup
-  const dataApplication = new ExpressDataApplication(path.resolve(__dirname, 'config'));
+  const dataApplication = new ExpressDataApplication(path.resolve(applicationDir, 'config'));
+
+  if (applicationDir !== __dirname) {
+    // update application configuration for including private and public key
+    // this operation is important for using @themost/test authenticator
+    dataApplication.getConfiguration().setSourceAt('settings/jwt', {
+      'publicKey': path.resolve(__dirname, 'server/config/public.pem'),
+      'privateKey': path.resolve(__dirname, 'server/config/private.key')
+    });
+  }
 
   if (dataApplication.hasService(Authenticator) === false) {
     dataApplication.useService(Authenticator);
@@ -88,7 +112,7 @@ function getApplication() {
   // use @themost/express service router
   // noinspection JSCheckFunctionSignatures
   app.use('/api/', (req, res, next) => {
-    passport.authenticate('bearer', { session: false }, (err, user) => {
+    passport.authenticate(['anonymous', 'bearer'], { session: false }, (err, user) => {
       if (err) { return next(err); }
       if (!user) {
         return next(new HttpUnauthorizedError());

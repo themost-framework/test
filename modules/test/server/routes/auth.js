@@ -23,6 +23,7 @@ import BearerStrategy from 'passport-http-bearer';
 import { BasicStrategy } from 'passport-http';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/user-model';
+import AnonymousStrategy from 'passport-anonymous';
 
 class Authenticator extends ApplicationService {
     /**
@@ -165,6 +166,9 @@ function authRouter(passport) {
     // passport bearer authorization strategy
     // https://github.com/jaredhanson/passport-http-bearer#usage
     // noinspection JSCheckFunctionSignatures
+
+    passport.use(new AnonymousStrategy());
+
     passport.use(new BearerStrategy({
             passReqToCallback: true
         },
