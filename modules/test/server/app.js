@@ -16,6 +16,7 @@ import createError from 'http-errors';
 import { HttpUnauthorizedError } from '@themost/common';
 import { DataCacheStrategy } from "@themost/data";
 import config from './config/app.json';
+import { addPath } from 'app-module-path';
 
 /**
  * @param {string} cwd
@@ -45,6 +46,8 @@ function getApplication(cwd) {
       // update database path
       findAdapter.options.database = testDatabase;
     }
+  } else {
+    addPath(applicationDir);
   }
   /**
    * @name Request#context
@@ -89,6 +92,7 @@ function getApplication(cwd) {
       'publicKey': path.resolve(__dirname, 'config/public.pem'),
       'privateKey': path.resolve(__dirname, 'config/private.key')
     });
+
   }
 
   if (dataApplication.hasService(Authenticator) === false) {
