@@ -86,8 +86,8 @@ function getApplication(cwd) {
     // update application configuration for including private and public key
     // this operation is important for using @themost/test authenticator
     dataApplication.getConfiguration().setSourceAt('settings/jwt', {
-      'publicKey': path.resolve(__dirname, 'server/config/public.pem'),
-      'privateKey': path.resolve(__dirname, 'server/config/private.key')
+      'publicKey': path.resolve(__dirname, 'config/public.pem'),
+      'privateKey': path.resolve(__dirname, 'config/private.key')
     });
   }
 
