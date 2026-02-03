@@ -26,7 +26,7 @@
     "@eslint/js": "^9.22.0",
     "@themost/cli": "^2.5.7",
     "@themost/client": "^2.16.0",
-    "@themost/common": "^2.11.1",
+    "@themost/common": "^2.12.0",
     "@themost/data": "^2.23.2",
     "@themost/ejs": "^2.0.1",
     "@themost/express": "^2.6.2",
