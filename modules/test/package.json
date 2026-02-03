@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@themost/client": "^2.16.0",
-    "@themost/common": "^2.11.1",
+    "@themost/common": "^2.12.0",
     "@themost/data": "^2.23.2",
     "@themost/ejs": "^2",
     "@themost/express": "^2.6.2",
