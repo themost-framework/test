@@ -15,7 +15,6 @@ import { docsRouter } from './routes/docs';
 import createError from 'http-errors';
 import { HttpUnauthorizedError } from '@themost/common';
 import { DataCacheStrategy } from "@themost/data";
-import config from './config/app.json';
 import { addPath } from 'app-module-path';
 
 /**
