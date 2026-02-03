@@ -113,7 +113,7 @@ function getApplication(cwd) {
   app.set('ExpressDataApplication', serviceApplication);
 
   // use data middleware (register req.context)
-  app.use(serviceApplication.middleware());
+  app.use(serviceApplication.middleware(app));
 
   app.use('/', indexRouter);
 
