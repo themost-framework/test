@@ -5,7 +5,7 @@
  * Use of this source code is governed by an BSD-3-Clause license that can be
  * found in the LICENSE file at https://themost.io/license
  */
-import {Authenticator as PassportAuthenticator} from "passport";
+import {Authenticator as PassportAuthenticator, PassportStatic} from "passport";
 import {Router} from "express";
 import {ApplicationService} from '@themost/common';
 import {DataContext} from '@themost/data';
@@ -47,7 +47,7 @@ export declare interface AuthenticatedUser {
     scope:string
 }
 
-declare function authRouter(): Router;
+declare function authRouter(passport: PassportStatic): Router;
 declare function authorize(passport: PassportAuthenticator): Router;
 
 declare class Authenticator extends ApplicationService {

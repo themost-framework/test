@@ -22,6 +22,7 @@ const log = debug('themost-framework:test');
             .addOption(new Option('-p, --port <number>', 'port number').env('PORT'))
             .addOption(new Option('-h, --host <string>', 'host address').env('IP'))
             .addOption(new Option('-a, --path <string>', 'application path'))
+            .addOption(new Option('-o, --origin <string>', 'api server origin e.g. https://api.example.com').default('http://localhost:3000'));
         program.parse();
         const args = program.opts();
         /**
@@ -31,7 +32,13 @@ const log = debug('themost-framework:test');
         if (args.path) {
             cwd = path.resolve(process.cwd(), args.path);
         }
-        await serveApplication(getApplication(cwd), args.port, args.host);
+        const app = getApplication(cwd);
+        /**
+         * @type {import('@themost/express').ExpressDataApplication}
+         */
+        const service = app.get('ExpressDataApplication');
+        service.configuration.setSourceAt('settings/api/origin', args.origin);
+        await serveApplication(app, args.port, args.host);
     }
     catch(err) {
         log(err);

@@ -14,8 +14,10 @@ import { Authenticator } from './routes/auth';
 import { docsRouter } from './routes/docs';
 import createError from 'http-errors';
 import { HttpUnauthorizedError } from '@themost/common';
-import { DataCacheStrategy } from "@themost/data";
+import {DataCacheStrategy, ODataModelBuilder} from '@themost/data';
 import { addPath } from 'app-module-path';
+import { setContext } from '@themost/express';
+import onHeaders from 'on-headers';
 
 /**
  * @param {string} cwd
@@ -82,27 +84,36 @@ function getApplication(cwd) {
   app.use(express.urlencoded({ extended: true }));
 
   // @themost/data data application setup
-  const dataApplication = new ExpressDataApplication(path.resolve(applicationDir, 'config'));
+  const serviceApplication = new ExpressDataApplication(path.resolve(applicationDir, 'config'));
 
   if (applicationDir !== __dirname) {
     // update application configuration for including private and public key
     // this operation is important for using @themost/test authenticator
-    dataApplication.getConfiguration().setSourceAt('settings/jwt', {
+    serviceApplication.getConfiguration().setSourceAt('settings/jwt', {
       'publicKey': path.resolve(__dirname, 'config/public.pem'),
       'privateKey': path.resolve(__dirname, 'config/private.key')
     });
 
   }
 
-  if (dataApplication.hasService(Authenticator) === false) {
-    dataApplication.useService(Authenticator);
+  if (serviceApplication.hasService(Authenticator) === false) {
+    serviceApplication.useService(Authenticator);
   }
 
+  const builder = serviceApplication.getService(ODataModelBuilder);
+
+  function getContextLink(context) {
+      const origin = context.application.getConfiguration().getSourceAt('settings/api/origin') || 'http://localhost:3000';
+      return new URL('/api/$metadata', origin).toString();
+  }
+
+  builder.hasContextLink(getContextLink);
+
   // hold data application
-  app.set('ExpressDataApplication', dataApplication);
+  app.set('ExpressDataApplication', serviceApplication);
 
   // use data middleware (register req.context)
-  app.use(dataApplication.middleware(app));
+  app.use(setContext(serviceApplication));
 
   app.use('/', indexRouter);
 
@@ -110,6 +121,36 @@ function getApplication(cwd) {
   app.use('/auth/', authRouter(passport));
 
   app.use('/api/docs', docsRouter);
+
+  app.use('/api/', (req, res, next) => {
+     onHeaders(res, function() {
+         if (!this.getHeader('OData-Version')) {
+             this.setHeader('OData-Version', '4.0')
+         }
+     });
+     return next();
+  });
+
+  app.get('/api/', (req, res, next) => {
+        try {
+            /**
+             * @type {ODataModelBuilder}
+             */
+            const builder = req.context.getApplication().getService(ODataModelBuilder);
+            // get edm document
+            return builder.getEdm().then(result => {
+                return res.json({
+                    '@odata.context': getContextLink(req.context),
+                    value: result.entityContainer.entitySet
+                });
+            }).catch(err => {
+                return next(err);
+            });
+        } catch (err) {
+            return next(err);
+        }
+    });
+
 
   app.get('/api/\\$metadata', getMetadataDocument());
   // use @themost/express service router
