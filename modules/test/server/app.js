@@ -113,7 +113,7 @@ function getApplication(cwd) {
   app.set('ExpressDataApplication', serviceApplication);
 
   // use data middleware (register req.context)
-  app.use(setContext(serviceApplication));
+  app.use(serviceApplication.middleware());
 
   app.use('/', indexRouter);
 
@@ -156,7 +156,7 @@ function getApplication(cwd) {
   // use @themost/express service router
   // noinspection JSCheckFunctionSignatures
   app.use('/api/', (req, res, next) => {
-    passport.authenticate(['anonymous', 'bearer'], { session: false }, (err, user) => {
+    passport.authenticate(['bearer', 'anonymous'], { session: false }, (err, user) => {
       if (err) { return next(err); }
       if (!user) {
         return next(new HttpUnauthorizedError());

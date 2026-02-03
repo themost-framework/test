@@ -114,7 +114,7 @@ describe('app', function() {
     expect(token_info.active).toBeTruthy();
   });
 
-  it('should post /auth/me', async () => {
+  it('should get /api/users/me', async () => {
     const base = getServerAddress(server);
     // get metadata
     let response = await fetch(new URL('/auth/token', base), {
@@ -135,12 +135,11 @@ describe('app', function() {
     expect(response.ok).toBeTruthy();
     const token = await response.json();
     expect(token).toBeTruthy();
-    response = await fetch(new URL('/auth/me', base), {
+    response = await fetch(new URL('/api/users/me', base), {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'Authorization': `Bearer ${token.access_token}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Authorization': `Bearer ${token.access_token}`
       }
     });
     expect(response.ok).toBeTruthy();
