@@ -30,6 +30,12 @@ function getApplication(cwd) {
   if (typeof cwd === 'string' && cwd.length > 0) { // if current directory is defined
     applicationDir = path.resolve(process.cwd(), cwd);
   }
+  /**
+   * @name testDatabase
+   * @description Holds the path of temporary test database path. At the end of application lifecycle, this database file is going to be removed.
+   * @type {string}
+   */
+  let testDatabase;
   // if application is the current directory
   if (applicationDir === __dirname) {
     // prepare to create a copy of test database
@@ -38,7 +44,6 @@ function getApplication(cwd) {
     const findAdapter = config.adapters.find(adapter => {
       return adapter.name === 'test';
     });
-    let testDatabase;
     if (findAdapter) {
       // get temp database path
       testDatabase = temp.path('.db');
