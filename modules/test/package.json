@@ -1,6 +1,6 @@
 {
   "name": "@themost/test",
-  "version": "2.13.1",
+  "version": "2.22.1",
   "description": "MOST Web Framework Test Api Server",
   "repository": "https://github.com/themost-framework/themost-test.git",
   "author": "Kyriakos Barbounakis<k.barbounakis@gmail.com>",
@@ -11,6 +11,9 @@
   "bin": {
     "themost-test-api": "dist/server/standalone.js"
   },
+  "engines": {
+    "node": ">=22"
+  },
   "devDependencies": {
     "@types/express": "^4.17.2",
     "@types/node": "^12.12.14",
@@ -19,23 +22,23 @@
   "dependencies": {
     "@themost/client": "^2.16.0",
     "@themost/common": "^2.12.3",
-    "@themost/data": "^2.24.0",
+    "@themost/data": "^2.24.3",
     "@themost/ejs": "^2",
-    "@themost/express": "^1.7.3",
+    "@themost/express": "^1.9.1",
     "@themost/node": "^2",
-    "@themost/query": "^2.14.17",
-    "@themost/sqlite": "^3.11.0",
-    "@themost/web": "^2.8.2",
+    "@themost/query": "^2.15.2",
+    "@themost/sqlite": "^3.26.2",
+    "@themost/web": "^2.18.0",
     "@themost/xml": "^2.5.2",
     "app-module-path": "^2.2.0",
     "commander": "^10.0.0",
     "cors": "^2.8.5",
     "debug": "~2.6.9",
     "ejs": "^3.1.6",
-    "express": "^4.19.2",
+    "express": "^4.22.3",
     "http-errors": "~1.6.2",
     "jsonwebtoken": "^9.0.3",
-    "morgan": "^1.10.1",
+    "morgan": "^1.12.1",
     "node-fetch": "^2.6.5",
     "passport": "^0.6.0",
     "passport-anonymous": "^1.0.1",
